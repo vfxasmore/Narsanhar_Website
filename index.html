@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NARSANHAR | The Production Archive</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@300;400;600&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- THEME VARIABLES --- */
+        :root {
+            --bg-main: #0B0C0E; --bg-charcoal: #17191D; --bg-panel: rgba(34, 37, 42, 0.7);
+            --border-color: rgba(54, 58, 64, 0.6); --text-primary: #E6E4DE; --text-secondary: #A4A8AF;
+            --accent-color: #B53A36; --accent-glow: rgba(181, 58, 54, 0.5);
+            --font-head: 'Space Grotesk', sans-serif; --font-body: 'Inter', sans-serif; --font-mono: 'IBM Plex Mono', monospace;
+        }
+
+        body.theme-gold {
+            --bg-main: #0A0A08; --bg-charcoal: #141411; --bg-panel: rgba(30, 30, 25, 0.7);
+            --border-color: rgba(212, 175, 55, 0.3); --accent-color: #D4AF37; --accent-glow: rgba(212, 175, 55, 0.4);
+        }
+
+        body.theme-blue {
+            --bg-main: #050A15; --bg-charcoal: #0A1224; --bg-panel: rgba(15, 25, 45, 0.7);
+            --border-color: rgba(0, 229, 255, 0.3); --accent-color: #00E5FF; --accent-glow: rgba(0, 229, 255, 0.4);
+        }
+
+        body.theme-white {
+            --bg-main: #F4F4F5; --bg-charcoal: #FFFFFF; --bg-panel: rgba(255, 255, 255, 0.9);
+            --border-color: rgba(0, 0, 0, 0.15); --text-primary: #111827; --text-secondary: #6B7280;
+            --accent-color: #D32F2F; --accent-glow: rgba(211, 47, 47, 0.2);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background-color: var(--bg-main); color: var(--text-primary);
+            font-family: var(--font-body); overflow: hidden; cursor: none; -webkit-font-smoothing: antialiased;
+            transition: background-color 0.8s ease, color 0.8s ease;
+        }
+        
+        a, button, input[type="range"] { cursor: none; pointer-events: auto; }
+
+        /* --- CUSTOM SCROLLBAR FOR MODALS & CONTENT --- */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-main); }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent-color); }
+
+        /* --- CINEMATIC OVERLAYS --- */
+        .vignette-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9998; pointer-events: none;
+            background: radial-gradient(circle at center, transparent 40%, rgba(0,0,0,0.6) 120%); mix-blend-mode: multiply;
+        }
+        body.theme-white .vignette-overlay { background: radial-gradient(circle at center, transparent 40%, rgba(0,0,0,0.15) 120%); }
+        
+        .scanlines {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9997; pointer-events: none;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.05) 50%, rgba(0,0,0,0.05));
+            background-size: 100% 4px; opacity: 0.4; animation: panScanlines 10s linear infinite;
+        }
+        @keyframes panScanlines { 0% { background-position: 0 0; } 100% { background-position: 0 100vh; } }
+
+        /* --- LOADER --- */
+        #loader { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-main); z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 1s ease-out; }
+        .loader-terminal { font-family: var(--font-mono); color: var(--text-secondary); width: 300px; }
+        .progress-bar { width: 100%; height: 2px; background: var(--border-color); margin-top: 1.5rem; position: relative; overflow: hidden; }
+        #progress-fill { position: absolute; top: 0; left: 0; height: 100%; width: 0%; background: var(--accent-color); transition: width 0.1s; }
+
+        /* --- THEME-SPECIFIC BACKGROUND ANIMATIONS --- */
+        #dynamic-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; }
+        .bg-pattern { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.5; transition: 0.8s; }
+        body.theme-red .bg-pattern, body.theme-gold .bg-pattern { background-image: radial-gradient(var(--border-color) 1px, transparent 1px); background-size: 40px 40px; }
+        body.theme-blue .bg-pattern { background-image: linear-gradient(0deg, transparent 24%, var(--border-color) 25%, var(--border-color) 26%, transparent 27%, transparent 74%, var(--border-color) 75%, var(--border-color) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, var(--border-color) 25%, var(--border-color) 26%, transparent 27%, transparent 74%, var(--border-color) 75%, var(--border-color) 76%, transparent 77%, transparent); background-size: 50px 50px; opacity: 0.1; }
+        body.theme-white .bg-pattern { background-image: linear-gradient(var(--border-color) 1px, transparent 1px), linear-gradient(90deg, var(--border-color) 1px, transparent 1px); background-size: 30px 30px; opacity: 0.3; }
+
+        .fluid-orb { position: absolute; border-radius: 50%; filter: blur(120px); transition: all 1s ease; background: var(--accent-color); opacity: 0.1; }
+        body.theme-white .fluid-orb { opacity: 0.05; filter: blur(80px); }
+        .orb-1 { width: 45vw; height: 45vw; top: -15vw; left: -10vw; animation: float 25s infinite ease-in-out alternate; }
+        .orb-2 { width: 50vw; height: 50vw; bottom: -10vw; right: -10vw; animation: float 20s infinite ease-in-out alternate-reverse; }
+        body.theme-blue .orb-1 { animation: scanOrb 10s infinite linear; width: 100vw; height: 10vh; filter: blur(30px); top: 0; left: 0; border-radius: 0; }
+        @keyframes float { 0% { transform: translate(0, 0) scale(1); } 50% { transform: translate(5vw, 8vh) scale(1.1); } 100% { transform: translate(-3vw, -5vh) scale(0.9); } }
+        @keyframes scanOrb { 0% { transform: translateY(-10vh); } 100% { transform: translateY(110vh); } }
+
+        /* --- CURSOR --- */
+        #cursor, #cursor-trail { position: fixed; top: 0; left: 0; border-radius: 50%; pointer-events: none; z-index: 9999; transform: translate(-50%, -50%); }
+        #cursor { width: 8px; height: 8px; background: var(--accent-color); transition: width 0.2s, height 0.2s, background 0.3s; }
+        #cursor-trail { width: 40px; height: 40px; border: 1px solid var(--accent-color); transition: 0.15s ease-out, border-color 0.3s; }
+        .hover-magnetic:hover ~ #cursor { width: 0; height: 0; }
+        .hover-text:hover ~ #cursor { width: 20px; height: 20px; background: var(--accent-color); mix-blend-mode: exclusion; }
+        .hover-expand:hover ~ #cursor::after { content: '+'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #000; font-family: monospace; font-size: 14px; font-weight: bold; }
+
+        /* Typography & Glitch */
+        h1, h2, h3 { font-family: var(--font-head); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; transition: color 0.5s; }
+        .mono { font-family: var(--font-mono); font-size: 0.8rem; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.1em; transition: color 0.5s; }
+        .accent { color: var(--accent-color); transition: color 0.5s ease; }
+        
+        .glitch-text { position: relative; display: inline-block; transition: color 0.3s; }
+        .glitch-text:hover { color: var(--accent-color); text-shadow: 2px 0 var(--text-primary), -2px 0 var(--accent-color); animation: glitch-anim 0.15s infinite linear alternate-reverse; }
+        @keyframes glitch-anim { 0% { transform: skew(0deg); } 20% { transform: skew(-10deg); } 40% { transform: skew(10deg); } 60% { transform: skew(-5deg); } 80% { transform: skew(5deg); } 100% { transform: skew(0deg); } }
+
+        /* --- GLOBAL NAVIGATION --- */
+        #ui-layer { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 10; display: flex; pointer-events: none; }
+        nav { width: 80px; height: 100vh; border-right: 1px solid var(--border-color); background: var(--bg-panel); backdrop-filter: blur(10px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5rem; pointer-events: all; z-index: 50; transition: background 0.5s, border-color 0.5s; }
+        .nav-dot { width: 12px; height: 12px; border: 1px solid var(--text-secondary); border-radius: 50%; cursor: none; position: relative; transition: all 0.3s; }
+        .nav-dot::after { content: attr(data-label); position: absolute; left: 30px; top: 50%; transform: translateY(-50%); font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-primary); opacity: 0; pointer-events: none; white-space: nowrap; transition: 0.3s; }
+        .nav-dot:hover { background: var(--text-secondary); transform: scale(1.5); }
+        .nav-dot:hover::after { opacity: 1; left: 20px; }
+        .nav-dot.active { background: var(--accent-color); border-color: var(--accent-color); box-shadow: 0 0 15px var(--accent-glow); }
+
+        .global-controls { position: fixed; top: 2rem; right: 3rem; z-index: 100; pointer-events: all; display: flex; gap: 1.5rem; }
+        .global-btn { background: none; border: none; color: var(--text-secondary); font-family: var(--font-mono); font-size: 0.85rem; letter-spacing: 0.1em; cursor: none; transition: color 0.3s; }
+        .global-btn:hover { color: var(--accent-color); }
+        .keyboard-hint { position: fixed; bottom: 2rem; left: 3rem; color: var(--text-secondary); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.1em; opacity: 0.5; pointer-events: none; z-index: 100; transition: opacity 0.5s; }
+        body:hover .keyboard-hint { opacity: 0.1; }
+
+        /* --- PAGE STRUCTURE & TRANSITIONS --- */
+        main { position: relative; flex-grow: 1; height: 100vh; overflow: hidden; pointer-events: all; perspective: 1000px; }
+        .page { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; padding: 4rem 6rem; 
+            display: flex; flex-direction: column; justify-content: center; 
+            clip-path: circle(0% at 50% 50%); opacity: 0; visibility: hidden; 
+            filter: blur(10px); transform: scale(0.95);
+            transition: clip-path 1.2s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.8s ease, filter 0.8s ease, transform 1s cubic-bezier(0.16, 1, 0.3, 1); 
+        }
+        .page.active { 
+            clip-path: circle(150% at 50% 50%); opacity: 1; visibility: visible; z-index: 20; 
+            filter: blur(0px); transform: scale(1); overflow-y: auto; overflow-x: hidden; 
+        }
+        
+        .page-content { 
+            max-width: 1200px; margin: 0 auto; width: 100%; position: relative; z-index: 2; 
+            display: flex; flex-direction: column; min-height: 100%; justify-content: center; padding-bottom: 2rem; 
+            transition: transform 0.1s ease-out; 
+        }
+        
+        .story-flow-nav { margin-top: auto; padding-top: 2rem; display: flex; justify-content: flex-end; width: 100%; }
+        .flow-btn { background: transparent; border: none; color: var(--text-primary); font-family: var(--font-mono); font-size: 1rem; text-transform: uppercase; letter-spacing: 0.1em; cursor: none; display: flex; align-items: center; gap: 1rem; position: relative; overflow: hidden; padding: 1rem 0; transition: color 0.5s; }
+        .flow-btn::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 1px; background: var(--accent-color); transform: translateX(-101%); transition: transform 0.4s cubic-bezier(0.86, 0, 0.07, 1); }
+        .flow-btn:hover::after { transform: translateX(0); }
+        .flow-btn:hover .arrow { transform: translateX(10px); color: var(--accent-color); }
+        .arrow { transition: transform 0.3s ease, color 0.3s ease; }
+
+        /* --- ADAPTIVE MEDIA & INTERACTIVE ELEMENTS --- */
+        .adaptive-media { width: 100%; height: auto; display: block; border-radius: 4px; border: 1px solid var(--border-color); object-fit: contain; }
+        .magnetic-btn { display: inline-block; padding: 1rem 3rem; border: 1px solid var(--border-color); background: transparent; color: var(--text-primary); font-family: var(--font-mono); text-transform: uppercase; cursor: none; position: relative; transition: border-color 0.3s, transform 0.1s, color 0.5s, background 0.5s; }
+        .magnetic-btn:hover { border-color: var(--accent-color); background: var(--accent-glow); color: #fff; }
+
+        .tilt-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; align-items: start; }
+        .tilt-card { background: var(--bg-charcoal); border: 1px solid var(--border-color); padding: 1.5rem; display: flex; flex-direction: column; height: auto; min-height: 250px; transform-style: preserve-3d; transform: perspective(1000px); position: relative; overflow: hidden; transition: border-color 0.3s, background 0.5s; }
+        .tilt-card:hover { border-color: var(--accent-color); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .tilt-card-inner { pointer-events: none; }
+        .tilt-card-inner a, .tilt-card-inner button { pointer-events: auto; position: relative; z-index: 10; }
+        .tilt-card-inner img { margin-bottom: 1.5rem; }
+        .expandable-card { cursor: none; }
+        
+        /* --- RESTORED FINALIZED 1:1 ZERO-DELAY WIPE (PAGE 3) --- */
+        .wipe-square-container { 
+            position: relative; width: 100%; height: 65vh; max-width: 65vh; aspect-ratio: 1/1; 
+            background: #000; border: 1px solid var(--border-color); margin: 2rem auto; overflow: hidden; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); transition: border-color 0.5s;
+        }
+        
+        .wipe-layer { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            background-size: cover; background-position: center; 
+            transition: none !important; /* Forces zero-lag hardware clip */
+        }
+        
+        #layer-layout { z-index: 1; background-image: url('./assets/images/Battlefield_Layout_Map.png'); }
+        #layer-blocking { z-index: 2; background-image: url('./assets/images/Blocking.png'); clip-path: inset(0 100% 0 0); }
+        #layer-render { z-index: 3; background-image: url('./assets/images/Render.png'); clip-path: inset(0 100% 0 0); }
+        
+        .integrated-slider { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; 
+            -webkit-appearance: none; background: transparent; outline: none; cursor: ew-resize; margin: 0; 
+        }
+        .integrated-slider::-webkit-slider-thumb { 
+            -webkit-appearance: none; appearance: none; width: 4px; height: 65vh; 
+            background: var(--accent-color); box-shadow: 0 0 15px var(--accent-color); 
+            cursor: ew-resize; border-radius: 0;
+            transition: none !important;
+        }
+        
+        .wipe-labels { display: flex; justify-content: center; gap: 2rem; font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-secondary); text-align: center; }
+        .wipe-labels span { transition: color 0.3s; }
+        .wipe-labels span.active { color: var(--accent-color); font-weight: bold; }
+
+        /* --- MODALS --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(11, 12, 14, 0.95); backdrop-filter: blur(10px); z-index: 1000; opacity: 0; visibility: hidden; transition: 0.4s ease; display: flex; align-items: center; justify-content: center; pointer-events: none; padding: 2rem; }
+        body.theme-white .modal-overlay { background: rgba(255, 255, 255, 0.95); }
+        .modal-overlay.active { opacity: 1; visibility: visible; pointer-events: all; }
+        .modal-content { width: auto; max-width: 90vw; max-height: 90vh; overflow-y: auto; background: var(--bg-charcoal); border: 1px solid var(--border-color); padding: 3rem; position: relative; transform: translateY(20px); transition: 0.4s ease, background 0.5s; display: flex; flex-direction: column; }
+        .modal-overlay.active .modal-content { transform: translateY(0); }
+        .close-modal { position: absolute; top: 1.5rem; right: 2rem; background: none; border: none; color: var(--text-secondary); font-family: var(--font-mono); font-size: 1rem; cursor: none; z-index: 10;}
+        .close-modal:hover { color: var(--accent-color); }
+        
+        /* DECRYPTION EFFECT (Excluding Redacted Elements) */
+        .decrypting p, .decrypting h2, .decrypting h3, .decrypting span:not(.redacted) { 
+            animation: textFlash 0.5s cubic-bezier(0.19, 1, 0.22, 1) forwards; color: transparent; text-shadow: 0 0 5px var(--accent-color);
+        }
+        @keyframes textFlash { 0% { color: transparent; text-shadow: 0 0 15px var(--accent-color); filter: blur(4px); } 100% { color: inherit; text-shadow: none; filter: blur(0px); } }
+
+        /* --- FIXED REDACTED TEXT --- */
+        .redacted {
+            background-color: var(--text-primary) !important; /* Solid block matching primary text color */
+            color: transparent !important; /* Text is completely hidden */
+            text-shadow: none !important;
+            padding: 0 6px; border-radius: 2px;
+            user-select: none; transition: all 0.3s ease;
+        }
+        .redacted:hover {
+            background-color: transparent !important; /* Block vanishes on hover */
+            color: var(--accent-color) !important; /* Text reveals itself */
+            text-shadow: 0 0 8px var(--accent-glow) !important;
+        }
+
+        /* Profile Image Formatting */
+        .dp-img {
+            width: 140px; height: 140px; border-radius: 50%; object-fit: cover; 
+            margin: 0 auto 1.5rem auto; display: block; border: 2px solid var(--accent-color);
+            background: var(--bg-main); box-shadow: 0 5px 15px rgba(0,0,0,0.5); pointer-events: auto;
+        }
+
+    </style>
+</head>
+<body class="theme-red" onclick="SynthEngine.init()">
+
+    <!-- CINEMATIC OVERLAYS -->
+    <div class="scanlines"></div>
+    <div class="vignette-overlay"></div>
+
+    <div id="loader">
+        <div class="loader-terminal">
+            <div class="loader-line">> INITIALIZING MAINFRAME...</div>
+            <div class="loader-line" style="opacity: 0; animation: fadeIn 0s forwards 0.4s;">> LOADING MEDIA PROTOCOLS...</div>
+            <div class="loader-line" style="opacity: 0; animation: fadeIn 0s forwards 0.8s;">> SYSTEM: <span class="accent" id="boot-percent">0%</span></div>
+            <div class="progress-bar"><div id="progress-fill"></div></div>
+        </div>
+    </div>
+    <style>@keyframes fadeIn { to { opacity: 1; } }</style>
+
+    <div id="dynamic-bg"><div class="bg-pattern"></div><div class="fluid-orb orb-1"></div><div class="fluid-orb orb-2"></div></div>
+
+    <div id="cursor"></div><div id="cursor-trail"></div>
+
+    <div id="ui-layer">
+        <div class="keyboard-hint">[ USE ARROW KEYS TO NAVIGATE ]</div>
+        <div class="global-controls">
+            <button class="global-btn hover-text audio-click" onclick="goBack()">[ BACK ]</button>
+            <button class="global-btn hover-text audio-click" onclick="goToPage(1)">[ HOME ]</button>
+            <button class="global-btn hover-text audio-click" onclick="toggleTheme()">[ THEME: <span id="theme-label">RED</span> ]</button>
+        </div>
+
+        <nav id="main-nav">
+            <div class="nav-dot active hover-text audio-hover audio-click" data-index="1" data-label="I. INITIALIZE"></div>
+            <div class="nav-dot hover-text audio-hover audio-click" data-index="2" data-label="II. THE ORIGIN"></div>
+            <div class="nav-dot hover-text audio-hover audio-click" data-index="3" data-label="III. BATTLEFIELD"></div>
+            <div class="nav-dot hover-text audio-hover audio-click" data-index="4" data-label="IV. METAHUMAN"></div>
+            <div class="nav-dot hover-text audio-hover audio-click" data-index="5" data-label="V. PIPELINE"></div>
+            <div class="nav-dot hover-text audio-hover audio-click" data-index="6" data-label="VI. STORYBOARDS"></div>
+            <div class="nav-dot hover-text audio-hover audio-click" data-index="7" data-label="VII. WORLD ARCHIVE"></div>
+            <div class="nav-dot hover-text audio-hover audio-click" data-index="8" data-label="VIII. ASSET LAB"></div>
+            <div class="nav-dot hover-text audio-hover audio-click" data-index="9" data-label="IX. PRODUCTION LOG"></div>
+            <div class="nav-dot hover-text audio-hover audio-click" data-index="10" data-label="X. THE CREATORS"></div>
+        </nav>
+
+        <main>
+            <!-- PAGE 1: INITIALIZE -->
+            <section id="page-1" class="page active">
+                <div class="page-content" style="align-items: center;">
+                    <span class="mono">CLASSIFIED ARCHIVE RECORD 001</span>
+                    <h1 class="glitch-text hover-text" style="font-size: 6rem; margin: 2rem 0;">NARSANHAR</h1>
+                    <p class="mono" style="margin-bottom: 4rem;">PRODUCTION MAINFRAME</p>
+                    <button class="magnetic-btn hover-magnetic audio-hover audio-click" onclick="goToPage(2)">INITIALIZE SEQUENCE</button>
+                </div>
+            </section>
+
+            <!-- PAGE 2: THE ORIGIN -->
+            <section id="page-2" class="page">
+                <div class="page-content">
+                    <div style="display: flex; gap: 4rem; align-items: center;">
+                        <div style="flex: 1;">
+                            <span class="mono accent">01 / CONCEPT</span>
+                            <h2 style="font-size: 3rem; margin: 1rem 0;">THE ORIGIN</h2>
+                            <p style="font-size: 1.1rem; line-height: 1.8;">Agastya, a depressed corporate worker, is manipulated into Aditya Gokhale's clandestine experiment. Stripped of humanity, his neural pathways are rewritten to become the ultimate weapon.</p>
+                            <p style="font-size: 1.1rem; line-height: 1.8; margin-top: 1rem; color: var(--text-secondary);">Years later, he awakens on a decimated frontline as Unit-07. Fractured memories of his past life clash against failing cybernetics as he attempts a final upload before total system failure.</p>
+                        </div>
+                        <div class="tilt-card hover-text" style="flex: 1; height: 100%;">
+                            <div class="tilt-card-inner">
+                                <span class="mono">DATABASE // LORE</span>
+                                <p style="margin-top: 2rem; color: var(--text-secondary);">"One by one, the participants collapse onto the beds. Their bodies go limp. Mechanical limbs replace damaged human tissue... Unit-07 stands inside the chamber."</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="story-flow-nav"><button class="flow-btn hover-text audio-click" onclick="goToPage(3)">ENTER THE BATTLEFIELD <span class="arrow">→</span></button></div>
+                </div>
+            </section>
+
+            <!-- PAGE 3: BATTLEFIELD EVOLUTION (Restored Seamless Single Slider) -->
+            <section id="page-3" class="page">
+                <div class="page-content" style="text-align: center;">
+                    <span class="mono accent">02 / SHOT EVOLUTION</span>
+                    <h2>BATTLEFIELD TOP-DOWN</h2>
+                    <p style="margin-top: 0.5rem; color: var(--text-secondary);">Drag the slider to wipe seamlessly through the Layout, Blocking, and Render stages.</p>
+                    
+                    <div class="wipe-square-container hover-magnetic" id="wipe-container">
+                        <div id="layer-layout" class="wipe-layer"></div>
+                        <div id="layer-blocking" class="wipe-layer" style="border-right: 2px solid var(--accent-color);"></div>
+                        <div id="layer-render" class="wipe-layer" style="border-right: 2px solid var(--accent-color);"></div>
+                        
+                        <input type="range" id="integrated-slider" class="integrated-slider audio-hover" min="0" max="200" value="0">
+                    </div>
+                    
+                    <div class="wipe-labels" id="wipe-labels">
+                        <span class="active">01. LAYOUT</span>
+                        <span>02. BLOCKING</span>
+                        <span>03. ASSET RENDER</span>
+                    </div>
+
+                    <div class="story-flow-nav"><button class="flow-btn hover-text audio-click" onclick="goToPage(4)">INSPECT METAHUMAN SYSTEM <span class="arrow">→</span></button></div>
+                </div>
+            </section>
+
+            <!-- PAGE 4: METAHUMAN -->
+            <section id="page-4" class="page">
+                <div class="page-content">
+                    <span class="mono accent">03 / CAPTURE SYSTEM</span>
+                    <h2 style="font-size: 3rem; margin: 1rem 0;">MARKERLESS SOLVE</h2>
+                    <p style="max-width: 600px; margin-bottom: 2rem;">Processing source video directly into Unreal Engine to animate the digital MetaHuman construct, avoiding traditional optical markers to maintain authentic micro-expressions.</p>
+                    
+                    <video class="adaptive-media hover-text" controls autoplay muted loop playsinline preload="metadata" style="max-height: 50vh; width: auto; margin: 0 auto; background: #000; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                        <source src="./assets/video/BTS_Motion_Capture.mp4" type="video/mp4">
+                    </video>
+
+                    <div class="story-flow-nav"><button class="flow-btn hover-text audio-click" onclick="goToPage(5)">VIEW PRODUCTION PIPELINE <span class="arrow">→</span></button></div>
+                </div>
+            </section>
+
+            <!-- PAGE 5: PIPELINE -->
+            <section id="page-5" class="page">
+                <div class="page-content" style="align-items: center;">
+                    <span class="mono accent">04 / THE SYSTEM</span>
+                    <h2 style="font-size: 3rem; margin: 1rem 0;">PRODUCTION PIPELINE</h2>
+                    <p class="mono">SELECT AN AVAILABLE STAGE TO INSPECT RECORDS</p>
+                    
+                    <div style="display: flex; gap: 2rem; margin-top: 4rem; position: relative; width: 100%; justify-content: center;">
+                        <svg style="position: absolute; top: 50%; left: 10%; width: 80%; height: 2px; z-index: -1;">
+                            <line x1="0" y1="1" x2="100%" y2="1" stroke="var(--border-color)" stroke-width="2" stroke-dasharray="6, 6"/>
+                        </svg>
+                        
+                        <div class="tilt-card hover-magnetic pipeline-card audio-click" onclick="openModal('script-modal')" style="height: 180px; width: 220px; align-items:center; text-align:center;">
+                            <div class="tilt-card-inner"><h3 class="accent">STORY</h3><p class="mono">Script & Ideation</p><span class="mono" style="margin-top: 1rem; display: block; color: var(--text-primary);">[ READ SCRIPT ]</span></div>
+                        </div>
+                        
+                        <div class="tilt-card pipeline-card locked" style="height: 180px; width: 220px; opacity: 0.5; border-style: dashed; align-items:center; text-align:center;">
+                            <div class="tilt-card-inner"><h3>ASSETS</h3><p class="mono">Maya / Blender</p><span class="mono accent" style="margin-top: 1rem; display: block;">IN PROGRESS</span></div>
+                        </div>
+                        <div class="tilt-card pipeline-card locked" style="height: 180px; width: 220px; opacity: 0.5; border-style: dashed; align-items:center; text-align:center;">
+                            <div class="tilt-card-inner"><h3>ANIMATION</h3><p class="mono">UE / Dynamics</p><span class="mono accent" style="margin-top: 1rem; display: block;">IN PROGRESS</span></div>
+                        </div>
+                    </div>
+                    <div class="story-flow-nav"><button class="flow-btn hover-text audio-click" onclick="goToPage(6)">PROCEED TO PRE-VIZ <span class="arrow">→</span></button></div>
+                </div>
+            </section>
+
+            <!-- PAGE 6: STORYBOARDS -->
+            <section id="page-6" class="page">
+                <div class="page-content">
+                    <span class="mono accent">05 / PRE-VIZ</span>
+                    <h2>STORYBOARDS & BLOCKING</h2>
+                    <p style="margin-top: 1rem; max-width: 700px;">Translating the script into visual flow. The 2D pre-visualization phase establishes precise camera layout and character blocking before transitioning into the full 3D pipeline.</p>
+                    
+                    <div class="tilt-grid" style="margin-top: 3rem;">
+                        <div class="tilt-card hover-expand expandable-card audio-click" onclick="expandCard(this, event)">
+                            <div class="tilt-card-inner">
+                                <img class="adaptive-media" src="./assets/images/Shot_7A.png" alt="Shot 7A">
+                                <span class="mono accent">SHOT 7A / HANDHELD</span>
+                                <h3>"GIVE ME COVER!"</h3>
+                                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.5rem;">Unit-07 engages on the battlefield, UI visible in POV layout.</p>
+                            </div>
+                        </div>
+                        <div class="tilt-card hover-expand expandable-card audio-click" onclick="expandCard(this, event)">
+                            <div class="tilt-card-inner">
+                                <img class="adaptive-media" src="./assets/images/Shot_24A.png" alt="Shot 24A">
+                                <span class="mono accent">SHOT 24A / TRACKING</span>
+                                <h3>"AMMO KHATAM"</h3>
+                                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.5rem;">Tracking the RPG approach. Enemy soldier locks aim onto Unit-10.</p>
+                            </div>
+                        </div>
+                        <div class="tilt-card hover-expand expandable-card audio-click" onclick="expandCard(this, event)">
+                            <div class="tilt-card-inner">
+                                <img class="adaptive-media" src="./assets/images/Shot_32A.png" alt="Shot 32A">
+                                <span class="mono accent">SHOT 32A / PULL OUT</span>
+                                <h3>MEMORY FLASHES</h3>
+                                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.5rem;">Blurred human voices and memories surge as systems malfunction.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="story-flow-nav"><button class="flow-btn hover-text audio-click" onclick="goToPage(7)">NEXT: WORLD ARCHIVE <span class="arrow">→</span></button></div>
+                </div>
+            </section>
+
+            <!-- PAGE 7: WORLD ARCHIVE -->
+            <section id="page-7" class="page">
+                <div class="page-content">
+                    <span class="mono accent">06 / LORE</span>
+                    <h2>WORLD ARCHIVE</h2>
+                    
+                    <div class="tilt-grid" style="margin-top: 2rem;">
+                        <div class="tilt-card hover-expand expandable-card audio-click" onclick="expandCard(this, event)">
+                            <div class="tilt-card-inner">
+                                <img class="adaptive-media" src="./assets/images/Aditya_Lab.jpg" alt="Lab">
+                                <h3 class="accent">ADITYA'S LAB</h3>
+                                <p class="mono">Location: Corporate Sector</p>
+                                <p style="margin-top: 0.5rem; color: var(--text-secondary); font-size: 0.9rem;">Advanced neuro-processing systems. The birthplace of Unit-07.</p>
+                            </div>
+                        </div>
+                        <div class="tilt-card hover-expand expandable-card audio-click" onclick="expandCard(this, event)">
+                            <div class="tilt-card-inner">
+                                <img class="adaptive-media" src="./assets/images/Battlefield.jpg" alt="Battlefield">
+                                <h3 class="accent">THE BATTLEFIELD</h3>
+                                <p class="mono">Location: Frontlines</p>
+                                <p style="margin-top: 0.5rem; color: var(--text-secondary); font-size: 0.9rem;">The site of a massive RPG explosion and Unit-10's final resting place.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="story-flow-nav"><button class="flow-btn hover-text audio-click" onclick="goToPage(8)">NEXT: ASSET LAB <span class="arrow">→</span></button></div>
+                </div>
+            </section>
+
+            <!-- PAGE 8: ASSET LAB -->
+            <section id="page-8" class="page">
+                <div class="page-content">
+                    <span class="mono accent">07 / 3D MODELS</span>
+                    <h2>ASSET LAB</h2>
+                    
+                    <div class="tilt-grid" style="grid-template-columns: repeat(2, 1fr); max-width: 800px; margin: 2rem 0;">
+                        <div class="tilt-card hover-expand expandable-card audio-click" onclick="expandCard(this, event)">
+                            <div class="tilt-card-inner">
+                                <img class="adaptive-media" src="./assets/images/Unit_07.png" alt="Unit 07" style="background: rgba(255,255,255,0.05);">
+                                <h3>UNIT-07 CHASSIS</h3>
+                                <p class="mono">Rigged / LookDev</p>
+                                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.5rem;">Textured with heavy rust and battlefield dirt for the forest reboot sequence.</p>
+                            </div>
+                        </div>
+                        <div class="tilt-card hover-expand expandable-card audio-click" onclick="expandCard(this, event)">
+                            <div class="tilt-card-inner">
+                                <img class="adaptive-media" src="./assets/images/Aditya.png" alt="Aditya Gokhale">
+                                <h3>ADITYA GOKHALE</h3>
+                                <p class="mono">Character / LookDev</p>
+                                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.5rem;">The mastermind behind the Cybernetics Lab and the NIRA experiment.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="story-flow-nav"><button class="flow-btn hover-text audio-click" onclick="goToPage(9)">NEXT: PRODUCTION LOG <span class="arrow">→</span></button></div>
+                </div>
+            </section>
+
+            <!-- PAGE 9: PRODUCTION JOURNAL -->
+            <section id="page-9" class="page">
+                <div class="page-content">
+                    <span class="mono accent">08 / BEHIND THE SCENES</span>
+                    <h2>PRODUCTION JOURNAL</h2>
+                    <div style="border-left: 2px solid var(--border-color); padding-left: 2.5rem; margin-top: 2rem; display: flex; flex-direction: column; gap: 1.5rem; max-height: 60vh; overflow-y: auto; padding-right: 1rem;">
+                        
+                        <div class="hover-text" style="transition: 0.3s; padding: 1.5rem; background: var(--bg-charcoal); border: 1px solid var(--border-color);">
+                            <span class="mono accent">ENTRY 01 // METAHUMAN MOCAP SOLVE</span>
+                            <p style="margin-top: 0.5rem; font-size: 0.95rem; color: var(--text-secondary);">Successfully processed source video footage into Unreal Engine to animate the digital MetaHuman facial rig. We opted for a markerless workflow to retain the subtle physical nuances and micro-expressions of the actor without the heavy cleanup of optical dots.</p>
+                        </div>
+                        
+                        <div class="hover-text" style="transition: 0.3s; padding: 1.5rem; background: var(--bg-charcoal); border: 1px solid var(--border-color);">
+                            <span class="mono accent">ENTRY 02 // PIPELINE AUTOMATION</span>
+                            <p style="margin-top: 0.5rem; font-size: 0.95rem; color: var(--text-secondary);">Developed custom Python scripts and PySide6 interfaces within Maya to accelerate the asset handoff. Geometry layout from Blender is now cleanly exporting via USD into our UE lighting environments, ensuring non-destructive iterations.</p>
+                        </div>
+
+                        <div class="hover-text" style="transition: 0.3s; padding: 1.5rem; background: var(--bg-charcoal); border: 1px solid var(--border-color);">
+                            <span class="mono accent">ENTRY 03 // BATTLEFIELD TOP-DOWN DYNAMICS</span>
+                            <p style="margin-top: 0.5rem; font-size: 0.95rem; color: var(--text-secondary);">Executed the final top-down interactive wipe system. We transitioned the proxy layout directly into the greyscale blocking phase to dial in camera tracking for the RPG impact, utilizing Houdini ragdoll simulations for the background robot wreckage before final texture application.</p>
+                        </div>
+
+                        <div class="hover-text" style="transition: 0.3s; padding: 1.5rem; background: var(--bg-charcoal); border: 1px solid var(--border-color);">
+                            <span class="mono accent">ENTRY 04 // FINAL RENDER DEADLINE</span>
+                            <p style="margin-top: 0.5rem; font-size: 0.95rem; color: var(--text-secondary);">Locked the look development for Aditya Gokhale's cinematic close-ups and Unit-07's rusted chassis. Compositing workflows are currently underway in Nuke. Target completion deadline: March 31, 2027.</p>
+                        </div>
+
+                    </div>
+                    <div class="story-flow-nav" style="padding-top: 1rem;"><button class="flow-btn hover-text audio-click" onclick="goToPage(10)">MEET THE CREATORS <span class="arrow">→</span></button></div>
+                </div>
+            </section>
+
+            <!-- PAGE 10: THE CREATORS -->
+            <section id="page-10" class="page">
+                <div class="page-content" style="align-items: center; text-align: center;">
+                    <span class="mono accent">09 / THE TEAM</span>
+                    <h2 class="glitch-text hover-text" style="font-size: 4rem; margin: 1rem 0;">A TWO-MAN ARMY</h2>
+                    <p class="mono" style="margin-bottom: 4rem;">PROJECT FOUNDERS & DIRECTORS</p>
+                    
+                    <div style="display: flex; gap: 4rem; width: 100%; justify-content: center;">
+                        <div class="tilt-card hover-text" style="height: auto; padding: 3rem 2rem; width: 40%; min-height: auto;">
+                            <div class="tilt-card-inner">
+                                <img src="./assets/images/aayush_dp.png" alt="Aayush More" class="dp-img">
+                                <h2 style="font-size: 2rem;">AAYUSH MORE</h2>
+                                <p class="mono" style="margin: 1rem 0 2rem 0;">3D ANIMATION / VFX / TECHNICAL DIR</p>
+                                <a class="mono hover-expand audio-click" href="https://www.instagram.com/aayush__9889/" target="_blank" style="text-decoration: none; color: var(--text-primary); border-bottom: 1px solid var(--border-color); display: inline-block;">[ INSTAGRAM ]</a>
+                            </div>
+                        </div>
+                        <div class="tilt-card hover-text" style="height: auto; padding: 3rem 2rem; width: 40%; min-height: auto;">
+                            <div class="tilt-card-inner">
+                                <img src="./assets/images/ashish_dp.png" alt="Ashish Thete" class="dp-img">
+                                <h2 style="font-size: 2rem;">ASHISH THETE</h2>
+                                <p class="mono" style="margin: 1rem 0 2rem 0;">3D ANIMATION / LOOKDEV / ART DIR</p>
+                                <a class="mono hover-expand audio-click" href="https://www.instagram.com/ashisshh.exe/" target="_blank" style="text-decoration: none; color: var(--text-primary); border-bottom: 1px solid var(--border-color); display: inline-block;">[ INSTAGRAM ]</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- SCRIPT MODAL WITH FIXED REDACTED TEXT -->
+    <div class="modal-overlay" id="script-modal">
+        <div class="modal-content">
+            <button class="close-modal hover-text audio-click" onclick="closeModal('script-modal')">[ CLOSE ]</button>
+            <h2 style="margin-bottom: 2rem;">CLASSIFIED SCRIPT FILE</h2>
+            <div style="font-family: var(--font-mono); line-height: 2; color: var(--text-secondary);">
+                <p>EXT. ADITYA'S LAB - EXPERIMENT AREA</p><br>
+                <p>Aditya explains the purpose of the <span class="redacted hover-text">clandestine experiment</span> and assures everyone that the procedure is completely safe. As part of the experiment, everyone is given a drink called "NIRA".</p><br>
+                <p>Agastya accepts the glass but hesitates. He smells the drink before taking a small sip. A strong pungent odor catches his attention. One by one, the participants <span class="redacted hover-text">collapse onto the beds</span>. Their bodies go limp.</p><br>
+                <p>His vision begins to blur. The laboratory begins to stretch and distort around him. His strength leaves him instantly.</p><br>
+                <p>MONTAGE: Bright surgical lights illuminate the room. His body is surgically opened from the center... <span class="redacted hover-text">Neural cables connect the biological brain to artificial processors.</span> Mechanical limbs replace damaged human tissue.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- UNIVERSAL CARD EXPANSION MODAL -->
+    <div class="modal-overlay" id="card-expand-modal" onclick="if(event.target === this) closeModal('card-expand-modal')">
+        <div class="modal-content" id="card-expand-content" style="max-width: 65vw; width: auto; background: var(--bg-main);">
+            <button class="close-modal hover-text audio-click" onclick="closeModal('card-expand-modal')">[ CLOSE ]</button>
+            <div id="cloned-card-container"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- BUILT-IN WEB AUDIO SYNTHESIZER ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const SynthEngine = {
+            initialized: false,
+            init: () => {
+                if(!SynthEngine.initialized) { if(audioCtx.state === 'suspended') audioCtx.resume(); SynthEngine.initialized = true; }
+            },
+            playTone: (freq, type, duration, vol) => {
+                if(!SynthEngine.initialized) return;
+                const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+                osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(vol, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+                osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + duration);
+            },
+            hover: () => {
+                let t = document.body.className;
+                if(t.includes('gold')) SynthEngine.playTone(600, 'sine', 0.1, 0.05);
+                else if(t.includes('white')) SynthEngine.playTone(800, 'triangle', 0.05, 0.03);
+                else if(t.includes('blue')) SynthEngine.playTone(400, 'square', 0.1, 0.02);
+                else SynthEngine.playTone(150, 'sawtooth', 0.1, 0.03); 
+            },
+            click: () => {
+                let t = document.body.className;
+                if(t.includes('gold')) SynthEngine.playTone(300, 'sine', 0.3, 0.15);
+                else if(t.includes('white')) SynthEngine.playTone(1200, 'square', 0.1, 0.05);
+                else if(t.includes('blue')) SynthEngine.playTone(200, 'triangle', 0.4, 0.1);
+                else SynthEngine.playTone(100, 'sawtooth', 0.3, 0.1);
+            },
+            themeChange: () => {
+                SynthEngine.playTone(300, 'sine', 0.5, 0.1); setTimeout(() => SynthEngine.playTone(450, 'sine', 0.8, 0.1), 100);
+            },
+            transition: () => {
+                SynthEngine.playTone(150, 'sine', 0.2, 0.05); setTimeout(() => SynthEngine.playTone(100, 'sine', 0.4, 0.05), 100);
+            }
+        };
+
+        document.querySelectorAll('.audio-hover').forEach(el => el.addEventListener('mouseenter', SynthEngine.hover));
+        document.querySelectorAll('.audio-click').forEach(el => el.addEventListener('click', SynthEngine.click));
+
+        // --- BOOT LOADER ---
+        window.addEventListener('load', () => {
+            let progress = 0; const loader = document.getElementById('loader'); const fill = document.getElementById('progress-fill'); const text = document.getElementById('boot-percent');
+            setTimeout(() => {
+                const interval = setInterval(() => {
+                    progress += Math.floor(Math.random() * 15) + 5; if(progress >= 100) progress = 100;
+                    fill.style.width = progress + '%'; text.innerText = progress + '%';
+                    if(progress === 100) { clearInterval(interval); setTimeout(() => { loader.style.opacity = '0'; setTimeout(() => loader.remove(), 1000); }, 500); }
+                }, 120);
+            }, 1000);
+        });
+
+        // --- CURSOR & PARALLAX ENGINE ---
+        const cursor = document.getElementById('cursor'); const trail = document.getElementById('cursor-trail');
+        let mouseX = window.innerWidth / 2, mouseY = window.innerHeight / 2, trailX = mouseX, trailY = mouseY;
+        
+        document.addEventListener('mousemove', (e) => { 
+            mouseX = e.clientX; mouseY = e.clientY; cursor.style.transform = `translate(${mouseX}px, ${mouseY}px)`; 
+            const moveX = (mouseX - window.innerWidth / 2) * -0.015; const moveY = (mouseY - window.innerHeight / 2) * -0.015;
+            document.querySelectorAll('.page.active .page-content').forEach(el => { el.style.transform = `translate(${moveX}px, ${moveY}px)`; });
+        });
+        
+        function animateTrail() {
+            trailX += (mouseX - trailX) * 0.15; trailY += (mouseY - trailY) * 0.15;
+            trail.style.transform = `translate(${trailX - 20}px, ${trailY - 20}px)`; requestAnimationFrame(animateTrail);
+        }
+        animateTrail();
+
+        // --- THEME TOGGLE ---
+        const themes = ['theme-red', 'theme-gold', 'theme-blue', 'theme-white'];
+        const themeLabels = ['RED / BLACK', 'GOLD / LUX', 'BLUE / TECH', 'RED / WHITE'];
+        let currentThemeIdx = 0;
+        function toggleTheme() {
+            document.body.className = themes[(currentThemeIdx + 1) % themes.length];
+            currentThemeIdx = (currentThemeIdx + 1) % themes.length;
+            document.getElementById('theme-label').innerText = themeLabels[currentThemeIdx];
+            SynthEngine.themeChange();
+        }
+
+        // --- NAVIGATION, HISTORY & KEYBOARD NAV ---
+        const pages = document.querySelectorAll('.page'); const navDots = document.querySelectorAll('.nav-dot'); let historyStack = [1];
+        
+        function goToPage(index, isBackAction = false) {
+            index = parseInt(index);
+            if(historyStack[historyStack.length - 1] !== index) SynthEngine.transition(); 
+            
+            navDots.forEach(dot => dot.classList.remove('active')); document.querySelector(`.nav-dot[data-index="${index}"]`).classList.add('active');
+            
+            pages.forEach(page => {
+                const content = page.querySelector('.page-content');
+                if(content) content.style.transform = 'translate(0px, 0px)';
+                page.classList.remove('active');
+            }); 
+            
+            document.getElementById(`page-${index}`).classList.add('active');
+            if (!isBackAction && historyStack[historyStack.length - 1] !== index) historyStack.push(index);
+        }
+        
+        function goBack() {
+            if (historyStack.length > 1) { historyStack.pop(); let prevPage = historyStack[historyStack.length - 1]; goToPage(prevPage, true); }
+        }
+        
+        navDots.forEach(dot => { dot.addEventListener('click', () => goToPage(dot.getAttribute('data-index'))); });
+
+        document.addEventListener('keydown', (e) => {
+            if(document.querySelector('.modal-overlay.active')) return; 
+            let current = historyStack[historyStack.length - 1];
+            if(e.key === 'ArrowRight' || e.key === 'ArrowDown') { if(current < 10) goToPage(current + 1); } 
+            else if(e.key === 'ArrowLeft' || e.key === 'ArrowUp') { if(current > 1) goToPage(current - 1); }
+        });
+
+        // --- RESTORED ZERO-DELAY SINGLE WIPE SLIDER (Page 3) ---
+        const wipeSlider = document.getElementById('integrated-slider');
+        const layerBlocking = document.getElementById('layer-blocking');
+        const layerRender = document.getElementById('layer-render');
+        const labels = document.querySelectorAll('#wipe-labels span');
+
+        wipeSlider.addEventListener('input', (e) => {
+            let val = parseInt(e.target.value);
+            if (val <= 100) {
+                // Wipe from 100% to 0% on the right side
+                let percentage = 100 - val; 
+                layerBlocking.style.clipPath = `inset(0 ${percentage}% 0 0)`; 
+                layerRender.style.clipPath = `inset(0 100% 0 0)`; // Keep render hidden
+                
+                labels.forEach(l => l.classList.remove('active')); 
+                if (val < 50) labels[0].classList.add('active'); else labels[1].classList.add('active');
+            } else {
+                let percentage = 200 - val;
+                layerBlocking.style.clipPath = `inset(0 0 0 0)`; // Fully reveal blocking
+                layerRender.style.clipPath = `inset(0 ${percentage}% 0 0)`; // Wipe render across
+                
+                labels.forEach(l => l.classList.remove('active')); 
+                if (val < 150) labels[1].classList.add('active'); else labels[2].classList.add('active');
+            }
+        });
+
+        // --- 3D TILT CARDS ---
+        const tiltCards = document.querySelectorAll('.tilt-card:not(.locked)');
+        tiltCards.forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect(); const x = e.clientX - rect.left; const y = e.clientY - rect.top;
+                const rotateX = ((y - rect.height / 2) / (rect.height / 2)) * -5; const rotateY = ((x - rect.width / 2) / (rect.width / 2)) * 5;
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            });
+            card.addEventListener('mouseleave', () => card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)');
+        });
+
+        // --- MODALS & CARD EXPANSION ---
+        function openModal(id) { 
+            const modal = document.getElementById(id); modal.classList.add('active'); 
+            const content = modal.querySelector('.modal-content'); content.classList.remove('decrypting');
+            void content.offsetWidth; content.classList.add('decrypting');
+        }
+        
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+        
+        function expandCard(element, event) {
+            if (event.target.closest('a')) return; 
+            
+            const innerContent = element.querySelector('.tilt-card-inner').innerHTML;
+            const container = document.getElementById('cloned-card-container');
+            container.innerHTML = innerContent;
+            
+            const imgs = container.querySelectorAll('img'); 
+            imgs.forEach(img => { 
+                img.style.maxHeight = '60vh'; 
+                img.style.objectFit = 'contain'; 
+                img.style.background = 'transparent';
+                if(img.classList.contains('dp-img')) {
+                    img.style.width = '200px'; img.style.height = '200px';
+                }
+            });
+            
+            openModal('card-expand-modal');
+        }
+    </script>
+</body>
+</html>
